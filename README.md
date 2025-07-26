@@ -10,7 +10,8 @@
 A lightweight log watcher for the Netrum blockchain miner.  
 It parses mining logs and sends updates to Telegram — without interrupting or slowing down your mining process.
 
----
+📌 Note: Make sure to run netrum-monitor on the same server where your Netrum miner is running.
+It reads logs directly from netrum-mining-log, so both must run on the same environment.
 
 ## ✨ Features
 
