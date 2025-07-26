@@ -1,5 +1,14 @@
 # ⛏️ Saandy Watcher
 
+[![Built with Python](https://img.shields.io/badge/Built%20with-Python-blue?logo=python)](https://www.python.org/)
+[![Deployed on Netrum Labs](https://img.shields.io/badge/Deployed%20on-Netrum%20Labs-blue)](https://netrum.io)
+[![Status](https://img.shields.io/badge/shouldRespond-true-brightgreen)](#)
+[![Mining Speed](https://img.shields.io/badge/Speed-5.3_H%2Fs-orange)](#)
+[![Uptime](https://img.shields.io/badge/Uptime-99.99%25-brightgreen)](#)
+[![Netrum Status](https://img.shields.io/badge/Netrum-Mining_Active-blue)](#)
+
+
+
 **Saandy Watcher** is a lightweight Node.js script that monitors output from `netrum-mining-log`, automatically restarts the log reader every 30 seconds, and sends mining updates to your Telegram bot.
 
 It does **not interfere with your actual mining process** — it only reads and reports logs.
@@ -24,17 +33,30 @@ It does **not interfere with your actual mining process** — it only reads and 
 git clone https://github.com/yourusername/saandy-watcher.git
 cd saandy-watcher
 ```
-### 2. Install dependencies
-```bash
-npm install
+🖥️ Running with screen (Recommended for servers)
+To keep your watcher running in the background (even after you close SSH), use screen.
+### 1. Start a new named screen session called "netrum"
 ```
-### 3. Create .env file
+screen -S netrum
+```
+### 2. Run the watcher inside that screen session
+```bash
+npm start
+```
+### 3. (Optional) Detach from the screen without stopping the process
+Ctrl + A, then D
+### 🔄 To reattach to the session later
+```
+screen -r netrum
+```
+### 4. Edit .env file
 ```bash
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_CHAT_ID=your_chat_id_here
 ```
-💡 You can get your TELEGRAM_BOT_TOKEN from @BotFather
--   And retrieve your chat ID by sending a message to your bot and accessing  https://api.telegram.org/bot<your_bot_token>/getUpdates
+-   You can get your TELEGRAM_BOT_TOKEN from @BotFather
+-  And retrieve your chat ID @GetMyChatID_Bot
+
 
 ▶️ Usage
 ### To start the watcher
