@@ -1,23 +1,25 @@
 #!/usr/bin/env node
 import { spawn } from 'child_process';
+import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 dotenv.config();
 
-let fetchFn;
-if (typeof fetch === 'undefined') {
-  fetchFn = (await import('node-fetch')).default;
-} else {
-  fetchFn = fetch;
-}
-
+// Load from .env
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-  console.error('❌ TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing in .env');
+  console.error('❌ Missing Telegram credentials in .env');
   process.exit(1);
 }
 
+let lastState = {
+  mined: null,
+  speed: null,
+  status: null,
+};
+
+// Kirim pesan ke Telegram
 function notifyTelegram(logLine) {
   const parts = logLine.split('|').map(p => p.trim());
 
@@ -32,7 +34,7 @@ Status: ${parts[4]?.replace('Status:', '').trim() || '-'}
 
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
-  return fetchFn(url, {
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -58,8 +60,24 @@ function runLogProcess() {
     const lines = data.toString().split('\n').filter(Boolean);
     for (const line of lines) {
       console.log('[LOG]', line);
+
       if (line.includes('Mined') || line.includes('Speed')) {
-        notifyTelegram(line);
+        const parts = line.split('|').map(p => p.trim());
+
+        const mined = parts[2]?.replace('Mined:', '').trim();
+        const speed = parts[3]?.replace('Speed:', '').trim();
+        const status = parts[4]?.replace('Status:', '').trim();
+
+        if (
+          mined !== lastState.mined ||
+          speed !== lastState.speed ||
+          status !== lastState.status
+        ) {
+          lastState = { mined, speed, status };
+          notifyTelegram(line);
+        } else {
+          console.log('⏸ No change, skipping Telegram message.');
+        }
       }
     }
   });
@@ -72,11 +90,12 @@ function runLogProcess() {
     console.log(`ℹ️ Mining log exited with code ${code}`);
   });
 
+  // Restart setiap 60 detik
   setTimeout(() => {
     console.log('🔁 Restarting mining log process...');
     logProcess.kill();
     runLogProcess();
-  }, 30_000);
+  }, 60_000);
 }
 
 runLogProcess();
