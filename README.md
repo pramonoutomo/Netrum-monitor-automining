@@ -1,4 +1,4 @@
-# ⛏️ Saandy Watcher
+# 🔭 Saandy Watcher
 
 [![Built with Python](https://img.shields.io/badge/Built%20with-Python-blue?logo=python)](https://www.python.org/)
 [![Deployed on Netrum Labs](https://img.shields.io/badge/Deployed%20on-Netrum%20Labs-blue)](https://netrum.io)
@@ -7,77 +7,68 @@
 [![Uptime](https://img.shields.io/badge/Uptime-99.99%25-brightgreen)](#)
 [![Netrum Status](https://img.shields.io/badge/Netrum-Mining_Active-blue)](#)
 
-
-
-**Saandy Watcher** is a lightweight Node.js script that monitors output from `netrum-mining-log`, automatically restarts the log reader every 30 seconds, and sends mining updates to your Telegram bot.
-
-It does **not interfere with your actual mining process** — it only reads and reports logs.
+Saandy Watcher is a lightweight CLI tool for monitoring Netrum mining logs and automatically sending alerts to Telegram.  
+Built with Node.js and runs effortlessly in background using screen or systemd.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-- 🔁 Auto-restarts `netrum-mining-log` every 30 seconds
-- 📤 Sends mining updates (time, mined, speed, status) to Telegram
-- ✅ Safe — doesn't touch or stop `netrum-mining`
-- 🌐 Automatically uses global `fetch` (Node 18+) or falls back to `node-fetch`
-- 🔐 Uses `.env` for secure configuration
+- ✅ Parses real-time `netrum-mining-log` output
+- ✅ Sends alerts to Telegram with mining status
+- ✅ Automatically restarts every 30 seconds
+- ✅ Simple `.env` configuration for Telegram integration
+- ✅ Lightweight and server-friendly — run via screen or tmux
 
 ---
 
-## 📦 Installation
+## 📦 Requirements
+
+> 💡 Requires **Node.js v18+** for native `fetch()` support  
+> Use `nvm` or your package manager to install/update Node.js.
+
+---
+
+## 🔧 Installation
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/saandy-watcher.git
+git clone https://github.com/your-user/saandy-watcher.git
 cd saandy-watcher
+npm install
+
 ```
-🖥️ Running with screen (Recommended for servers)
-To keep your watcher running in the background (even after you close SSH), use screen.
-### 1. Start a new named screen session called "netrum"
+### 2. Start a named screen session called netrum
 ```
 screen -S netrum
 ```
-### 2. Run the watcher inside that screen session
-```bash
+### 3. Run the watcher inside that screen
+```
 npm start
 ```
-### 3. (Optional) Detach from the screen without stopping the process
+### 4. (Optional) Detach from the screen without stopping the process
+```
 Ctrl + A, then D
-### 🔄 To reattach to the session later
 ```
-screen -r netrum
+## 🔐 Edit .env file
+### 📌 Do not share this file publicly. Add it to .gitignore.
+### Edit called .env in the root directory
 ```
-### 4. Edit .env file
-```bash
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_chat_id_here
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
 ```
--   You can get your TELEGRAM_BOT_TOKEN from @BotFather
--  And retrieve your chat ID @GetMyChatID_Bot
+### ✉️ Example Telegram Message
+<img width="166" height="143" alt="image" src="https://github.com/user-attachments/assets/8467d827-ddbe-4eb6-9d90-ff049431b8f9" />
 
-
-▶️ Usage
-### To start the watcher
-```bash
-npm start
+🪵 Logs
+The watcher reads log output from:
 ```
-### 🖼 Example Telegram Message
-<img width="434" height="144" alt="image" src="https://github.com/user-attachments/assets/ab058e5e-a618-4bea-8cda-a0698275c82d" />
-
-📄 License
-MIT License © 2025 [Saandy](https://github.com/KaelVNode)
----
-
-Let me know if you’d like:
-- A Markdown badge header (for GitHub flair)
-- CI integration suggestions
-- A project logo
-
-I can help polish it even more!
-
-
-
-
-
+netrum-mining-log
+```
+Make sure this command is working and returns structured log lines like:
+```
+14:22:01 | 98% | Mined: 0.03 | Speed: 5.27 H/s | Status: ONLINE
+```
+# 📄 License MIT License © 2025 [Saandy](https://github.com/KaelVNode/netrum-monitor)
+Feel free to fork, modify, or integrate with your Netrum rigs.
