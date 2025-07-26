@@ -34,7 +34,7 @@ Built with Node.js and runs effortlessly in background using screen or systemd.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-user/saandy-watcher.git
+git clone https://github.com/KaelVNode/saandy-watcher.git
 cd saandy-watcher
 npm install
 
