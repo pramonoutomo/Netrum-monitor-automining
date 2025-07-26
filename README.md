@@ -68,7 +68,7 @@ netrum-mining-log
 ```
 Make sure this command is working and returns structured log lines like:
 ```
-14:22:01 | 98% | Mined: 0.03 | Speed: 5.27 H/s | Status: ONLINE
+14:22:01 | 98% | Mined: 0.03 | Speed: 5.27 H/s | Status: ACTIVE
 ```
 # 📄 License MIT License © 2025 [Saandy](https://github.com/KaelVNode/netrum-monitor)
 Feel free to fork, modify, or integrate with your Netrum rigs.
