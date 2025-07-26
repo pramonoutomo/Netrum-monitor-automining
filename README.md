@@ -60,7 +60,11 @@ TELEGRAM_CHAT_ID=your_chat_id
 
 Then save:
 
-Press Ctrl + O → Enter → Ctrl + X
+Press Ctrl + X
+
+Press Y to confirm
+
+Press Enter to finish
 
 ### 3. Run the watcher inside that screen
 ```
