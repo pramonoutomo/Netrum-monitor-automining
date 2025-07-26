@@ -34,8 +34,8 @@ Built with Node.js and runs effortlessly in background using screen or systemd.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/KaelVNode/saandy-watcher.git
-cd saandy-watcher
+git clone https://github.com/KaelVNode/netrum-monitor.git
+cd netrum-monitor
 npm install
 
 ```
