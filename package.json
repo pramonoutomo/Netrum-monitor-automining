@@ -1,0 +1,14 @@
+{
+  "name": "saandy-watcher",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Watch netrum-mining-log and send Telegram updates every 30 seconds",
+  "main": "saandy-watcher.js",
+  "scripts": {
+    "start": "node saandy-watcher.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "node-fetch": "^3.0.0"
+  }
+}
