@@ -1,32 +1,50 @@
 # 🛠️ netrum-monitor
 
-[![Built with Python](https://img.shields.io/badge/Built%20with-Python-blue?logo=python)](https://www.python.org/)
+[![Built with Node.js](https://img.shields.io/badge/Built%20with-Node.js-green?logo=node.js)](https://nodejs.org/)
 [![Deployed on Netrum Labs](https://img.shields.io/badge/Deployed%20on-Netrum%20Labs-blue)](https://netrum.io)
-[![Status](https://img.shields.io/badge/shouldRespond-true-brightgreen)](#)
 [![Mining Speed](https://img.shields.io/badge/Speed-5.3_H%2Fs-orange)](#)
 [![Uptime](https://img.shields.io/badge/Uptime-99.99%25-brightgreen)](#)
 [![Netrum Status](https://img.shields.io/badge/Netrum-Mining_Active-blue)](#)
 
 A lightweight log watcher for the Netrum blockchain miner.  
-It parses mining logs and sends updates to Telegram — without interrupting or slowing down your mining process.
+It parses mining logs and sends real-time updates to Telegram — without interrupting your mining process.
 
-📌 Note: Make sure to run netrum-monitor on the same server where your Netrum miner is running.
-It reads logs directly from netrum-mining-log, so both must run on the same environment.
+---
+
+## 📌 Prerequisites
+
+Before running the script, make sure you have:
+
+### ✅ Telegram Bot Token
+
+- Create a bot using [@BotFather](https://t.me/BotFather)
+- Save the token you receive (e.g., `123456789:ABCDEF...`)
+
+### ✅ Telegram Chat ID
+
+- Send a message to your bot  
+- Get your chat ID via [@userinfobot](https://t.me/userinfobot)  
+  or check using Bot API:  
+  `https://api.telegram.org/bot<your_token>/getUpdates`
+
+> Group Chat IDs usually start with a minus sign (`-123456789`)
+
+---
 
 ## ✨ Features
 
-- Watches real-time logs from `netrum-mining-log`
-- Parses updates: mined amount, speed, status
-- Sends formatted messages to Telegram
-- Automatically restarts log reading every 60 seconds
-- Safe & non-intrusive to the mining process
+- Realtime log parsing from `netrum-mining-log`
+- Telegram updates: time, mined amount, speed, and status
+- Auto-claim when mining reaches 100%
+- Auto-restarts log reading every 5 minutes
+- Lightweight and safe (doesn’t interfere with mining)
 
 ---
 
 ## 📦 Requirements
 
-> 💡 Requires **Node.js v18+** for native `fetch()` support  
-> Use `nvm` or your package manager to install/update Node.js.
+> 💡 Requires **Node.js v18+** (for native `fetch()` support)  
+> Use `nvm` or your package manager to install or upgrade Node.js.
 
 ---
 
@@ -39,54 +57,62 @@ git clone https://github.com/KaelVNode/netrum-monitor.git
 cd netrum-monitor
 npm install
 ```
-### 2. Start a named screen session called netrum
-```
+
+### 2. Run inside a screen session
+
+You must run this inside a named screen session to keep it alive:
+
+```bash
 screen -S netrum
-```
-🔐 Set up .env file
-📌 Never share your .env file publicly.
-It’s already ignored in .gitignore.
-
-Create the file:
-```
-nano .env
-```
-```
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
-```
-- You can get your TELEGRAM_BOT_TOKEN from [@BotFather](https://t.me/BotFather)
-
-- You can retrieve your TELEGRAM_CHAT_ID using [@GetMyChatID_Bot](https://t.me/GetMyChatID_Bot)
-
-Then save:
-
-Press Ctrl + X
-
-Press Y to confirm
-
-Press Enter to finish
-
-### 3. Run the watcher inside that screen
-```
 npm start
 ```
-### 4. (Optional) Detach from the screen without stopping the process
-```
+
+On first run, the script will prompt for:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+
+It will save them into a `.env` file automatically.
+
+### 3. Detach the screen (optional)
+
+To leave the process running in background:
+
+```bash
 Ctrl + A, then D
 ```
 
-### ✉️ Example Telegram Message
-<img width="166" height="143" alt="image" src="https://github.com/user-attachments/assets/8467d827-ddbe-4eb6-9d90-ff049431b8f9" />
+To return later:
 
-🪵 Logs
-The watcher reads log output from:
+```bash
+screen -r netrum
 ```
+
+---
+
+### ✉️ Example Telegram Message
+
+<img width="166" height="143" alt="Mining update" src="https://github.com/user-attachments/assets/8467d827-ddbe-4eb6-9d90-ff049431b8f9" />
+
+---
+
+### 🪵 Log Source
+
+The watcher listens to output from:
+
+```bash
 netrum-mining-log
 ```
-Make sure this command is working and returns structured log lines like:
-```
+
+Make sure this command runs and outputs like:
+
+```text
 14:22:01 | 98% | Mined: 0.03 | Speed: 5.27 H/s | Status: ACTIVE
 ```
-### 📄 License MIT License © 2025 [Saandy](https://github.com/KaelVNode/netrum-monitor)
-Feel free to fork, modify, or integrate with your Netrum rigs.
+
+---
+
+### 📄 License
+
+MIT License © 2025 [Saandy](https://github.com/KaelVNode/netrum-monitor)  
+Feel free to fork, improve, or integrate with your own mining automation.
