@@ -5,6 +5,10 @@
 [![Mining Speed](https://img.shields.io/badge/Speed-5.3_H%2Fs-orange)](#)
 [![Uptime](https://img.shields.io/badge/Uptime-99.99%25-brightgreen)](#)
 [![Netrum Status](https://img.shields.io/badge/Netrum-Mining_Active-blue)](#)
+[![Node Version](https://img.shields.io/badge/node-%3E=18.0.0-green)](https://nodejs.org/)
+[![Auto Start](https://img.shields.io/badge/Auto--Start-Systemd-blue)](#)
+[![Last Update](https://img.shields.io/github/last-commit/KaelVNode/netrum-monitor)](https://github.com/KaelVNode/netrum-monitor/commits/main)
+[![License](https://img.shields.io/github/license/KaelVNode/netrum-monitor)](LICENSE)
 
 A lightweight log watcher for the Netrum blockchain miner.  
 It parses mining logs and sends real-time updates to Telegram — without interrupting your mining process.
