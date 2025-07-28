@@ -29,33 +29,33 @@ async function main() {
   let TELEGRAM_BOT_TOKEN = cliArgs.token || process.env.TELEGRAM_BOT_TOKEN;
   let TELEGRAM_CHAT_ID = cliArgs.chat || process.env.TELEGRAM_CHAT_ID;
 
-  // Jika masih kosong, minta input dari user
+  // Prompt if values are missing
   if (!TELEGRAM_BOT_TOKEN) {
-    TELEGRAM_BOT_TOKEN = await ask('Masukkan TELEGRAM_BOT_TOKEN: ');
+    TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
   }
 
   if (!TELEGRAM_CHAT_ID) {
-    TELEGRAM_CHAT_ID = await ask('Masukkan TELEGRAM_CHAT_ID: ');
+    TELEGRAM_CHAT_ID = await ask('Enter TELEGRAM_CHAT_ID: ');
   }
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('Token dan Chat ID wajib diisi!');
+    console.error('Token and Chat ID are required!');
     process.exit(1);
   }
 
   rl.close();
 
-  // Buat file .env jika belum ada
+  // Create .env file if it doesn't exist
   const envPath = path.resolve(process.cwd(), '.env');
   if (!fs.existsSync(envPath)) {
-    const envContent = 
+    const envContent =
 `TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
 `;
     fs.writeFileSync(envPath, envContent);
-    console.log('.env file berhasil dibuat.');
+    console.log('.env file created successfully.');
   } else {
-    console.log('.env ditemukan. Tidak perlu membuat ulang.');
+    console.log('.env file found. Skipping creation.');
   }
 
   let lastState = {
@@ -152,7 +152,7 @@ Status: ${status}
               runAutoClaim();
             }
           } else {
-            console.log('No change in state, skipping Telegram update.');
+            console.log('No change in mining state. Skipping Telegram update.');
           }
         }
       }
@@ -167,15 +167,15 @@ Status: ${status}
     });
 
     setTimeout(() => {
-      console.log('Restarting mining log process...');
+      console.log('Restarting mining log process after timeout...');
       logProcess.kill();
       runLogProcess();
-    }, 300000);
+    }, 300000); // 5 minutes
   }
 
-  // Jalankan monitoring
+  // Start monitoring
   runLogProcess();
 }
 
-// Jalankan script utama
+// Start main script
 main();
