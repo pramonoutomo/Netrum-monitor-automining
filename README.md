@@ -63,7 +63,12 @@ Before running the script, make sure you have:
 ```bash
 git clone https://github.com/KaelVNode/netrum-monitor.git
 cd netrum-monitor
+```
+```
 npm install
+```
+```
+npm install dotenv node-fetch
 ```
 
 ### 2. Run inside a screen session
