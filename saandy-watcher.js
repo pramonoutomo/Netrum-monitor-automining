@@ -14,10 +14,9 @@ const rl = readline.createInterface({
 });
 
 function ask(question) {
-  return new Promise(resolve => rl.question(question, answer => resolve(answer)));
+  return new Promise(resolve => rl.question(question, answer => resolve(answer.trim())));
 }
 
-// Parse CLI args: --token=xxx --chat=yyy
 const args = process.argv.slice(2);
 let cliArgs = {};
 for (const arg of args) {
@@ -28,29 +27,34 @@ for (const arg of args) {
 async function main() {
   let TELEGRAM_BOT_TOKEN = cliArgs.token || process.env.TELEGRAM_BOT_TOKEN;
   let TELEGRAM_CHAT_ID = cliArgs.chat || process.env.TELEGRAM_CHAT_ID;
+  let WALLET_ADDRESS = cliArgs.wallet || process.env.WALLET_ADDRESS;
 
-  // Prompt if values are missing
   if (!TELEGRAM_BOT_TOKEN) {
     TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
   }
-
   if (!TELEGRAM_CHAT_ID) {
     TELEGRAM_CHAT_ID = await ask('Enter TELEGRAM_CHAT_ID: ');
   }
+  if (!WALLET_ADDRESS) {
+    WALLET_ADDRESS = await ask('Enter WALLET_ADDRESS: ');
+  }
 
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('Token and Chat ID are required!');
+  let timeoutMinutes = await ask('Enter log restart timeout in minutes (default: 5): ');
+  const TIMEOUT_MS = parseInt(timeoutMinutes) * 60000 || 300000;
+
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || !WALLET_ADDRESS) {
+    console.error('All values are required!');
     process.exit(1);
   }
 
   rl.close();
 
-  // Create .env file if it doesn't exist
   const envPath = path.resolve(process.cwd(), '.env');
   if (!fs.existsSync(envPath)) {
     const envContent =
 `TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+WALLET_ADDRESS=${WALLET_ADDRESS}
 `;
     fs.writeFileSync(envPath, envContent);
     console.log('.env file created successfully.');
@@ -58,13 +62,41 @@ TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
     console.log('.env file found. Skipping creation.');
   }
 
-  let lastState = {
-    mined: null,
-    speed: null,
-    status: null,
-  };
+  let logStarted = false;
+  let dailyStats = { mined: 0, claims: 0 };
 
-  function sendToTelegram(text) {
+  async function getBalances() {
+    const rpc = 'https://base-rpc.publicnode.com';
+    const NPT_CONTRACT = '0xB8c2CE84F831175136cebBFD48CE4BAb9c7a6424';
+
+    const [ethRes, nptRes] = await Promise.all([
+      fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 1, method: 'eth_getBalance',
+          params: [WALLET_ADDRESS, 'latest']
+        })
+      }),
+      fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 2, method: 'eth_call',
+          params: [{
+            to: NPT_CONTRACT,
+            data: '0x70a08231000000000000000000000000' + WALLET_ADDRESS.replace(/^0x/, '')
+          }, 'latest']
+        })
+      })
+    ]);
+
+    const ethBalance = parseInt((await ethRes.json()).result, 16) / 1e18;
+    const nptBalance = parseInt((await nptRes.json()).result, 16) / 1e18;
+    return { ethBalance, nptBalance };
+  }
+
+  async function sendToTelegram(text) {
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     return fetch(url, {
       method: 'POST',
@@ -72,21 +104,38 @@ TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text,
-        parse_mode: 'HTML',
-      }),
+        parse_mode: 'HTML'
+      })
     })
-      .then(res => res.json())
-      .then(json => {
-        if (!json.ok) console.error('Telegram Error:', json);
-      });
+    .then(res => res.json())
+    .then(json => {
+      if (!json.ok) console.error('Telegram Error:', json);
+    });
   }
+
+  async function sendDailyReport() {
+    const { ethBalance, nptBalance } = await getBalances();
+    const now = new Date().toLocaleString();
+    await sendToTelegram(`
+<b>Daily Mining Report</b>
+Time: ${now}
+Mined: ${dailyStats.mined.toFixed(6)} NPT
+Claims: ${dailyStats.claims}
+Wallet: ${WALLET_ADDRESS}
+ETH Balance: ${ethBalance.toFixed(6)}
+NPT Balance: ${nptBalance.toFixed(6)}
+    `.trim());
+    dailyStats = { mined: 0, claims: 0 };
+  }
+
+  await sendDailyReport(); // initial report
 
   function runAutoClaim() {
     sendToTelegram('Starting automatic NPT claim...');
 
     const claimProcess = spawn('node', ['/root/netrum-monitor/claim-cli.js']);
-
     let output = '';
+
     claimProcess.stdout.on('data', (data) => {
       const text = data.toString();
       output += text;
@@ -100,13 +149,15 @@ TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
     });
 
     claimProcess.on('close', (code) => {
-      const match = output.match(/https:\/\/basescan\.org\/tx\/[^\s]+/);
+      const match = output.match(/https:\/\/basescan\.org\/tx\/\S+/);
       const txLink = match ? match[0] : null;
       if (code === 0) {
+        dailyStats.claims += 1;
         sendToTelegram(`
 <b>Claim Result</b>
 Status: Success
-Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`.trim());
+Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`);
+        if (logStarted) sendDailyReport();
       } else {
         sendToTelegram(`<b>Claim Result</b>\nStatus: Failed\nExit Code: ${code}`);
       }
@@ -116,6 +167,7 @@ Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`.trim(
   function runLogProcess() {
     console.log('Starting mining log monitoring...');
     const logProcess = spawn('netrum-mining-log');
+    if (!logStarted) logStarted = true;
 
     logProcess.stdout.on('data', (data) => {
       const lines = data.toString().split('\n').filter(Boolean);
@@ -123,36 +175,29 @@ Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`.trim(
         console.log('[LOG]', line);
 
         if (line.includes('Mining session completed')) {
-          console.log('Detected mining session complete. Restarting...');
           logProcess.kill();
           return runLogProcess();
         }
 
         if (line.includes('Mined') || line.includes('Speed')) {
           const parts = line.split('|').map(p => p.trim());
-
-          const mined = parts[2]?.replace('Mined:', '').trim();
+          const mined = parseFloat(parts[2]?.replace('Mined:', '') || 0);
           const speed = parts[3]?.replace('Speed:', '').trim();
           const status = parts[4]?.replace('Status:', '').trim();
           const progress = parts[1] || '-';
 
-          if (mined !== lastState.mined || speed !== lastState.speed || status !== lastState.status) {
-            lastState = { mined, speed, status };
+          if (!isNaN(mined)) dailyStats.mined = mined;
 
-            sendToTelegram(`
+          sendToTelegram(`
 <b>Mining Update</b>
 Time: ${parts[0] || '-'}
 Progress: ${progress}
 Mined: ${mined}
 Speed: ${speed}
-Status: ${status}
-            `.trim());
+Status: ${status}`.trim());
 
-            if (progress.includes('100.00%') && status.includes('INACTIVE')) {
-              runAutoClaim();
-            }
-          } else {
-            console.log('No change in mining state. Skipping Telegram update.');
+          if (progress.includes('100.00%') && status.includes('INACTIVE')) {
+            runAutoClaim();
           }
         }
       }
@@ -167,15 +212,13 @@ Status: ${status}
     });
 
     setTimeout(() => {
-      console.log('Restarting mining log process after timeout...');
+      console.log(`Restarting mining log process after ${TIMEOUT_MS / 1000}s...`);
       logProcess.kill();
       runLogProcess();
-    }, 300000); // 5 minutes
+    }, TIMEOUT_MS);
   }
 
-  // Start monitoring
   runLogProcess();
 }
 
-// Start main script
 main();
