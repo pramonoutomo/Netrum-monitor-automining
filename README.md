@@ -17,6 +17,10 @@ It parses mining logs and sends real-time updates to Telegram — without interr
 
 ## 📌 Prerequisites
 
+> ⚠️ **Important:**  
+> This script must run on the **same server** as the mining process  
+> so it can access and parse the `netrum-mining-log` output directly.
+
 Before running the script, make sure you have:
 
 ### ✅ Telegram Bot Token
