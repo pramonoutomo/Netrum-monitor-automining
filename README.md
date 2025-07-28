@@ -83,7 +83,13 @@ npm start
 On first run, the script will prompt for:
 
 - `TELEGRAM_BOT_TOKEN`
+-  Your Telegram bot token, used to send messages.
 - `TELEGRAM_CHAT_ID`
+-  The Telegram chat ID where the updates will be sent.
+- `WALLET_ADDRESS`
+-  Your Base/NPT wallet address used to check balances and mining stats.
+- `Telegram messages`
+-  How many minutes between each mining log process restart (default is 5 minutes if left blank).
 
 It will save them into a `.env` file automatically.
 
