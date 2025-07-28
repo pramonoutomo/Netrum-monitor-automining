@@ -96,7 +96,19 @@ screen -r netrum
 
 ### ✉️ Example Telegram Message
 
-<img width="166" height="143" alt="Mining update" src="https://github.com/user-attachments/assets/8467d827-ddbe-4eb6-9d90-ff049431b8f9" />
+🔹 Mining Update Message:
+
+<img width="146" height="116" alt="image" src="https://github.com/user-attachments/assets/f92ce8e3-d2c1-4fc0-bdbc-42c27dcb6c53" />
+
+🔹 Successful Claim Result:
+
+<img width="461" height="64" alt="image" src="https://github.com/user-attachments/assets/6311fdfa-a39d-4367-9a5c-e8f70bb08670" />
+
+🔹 Failed Claim Result:
+
+<img width="135" height="71" alt="image" src="https://github.com/user-attachments/assets/ec422c9e-196a-4b02-ba4b-74f71eba2732" />
+
+
 
 ---
 
