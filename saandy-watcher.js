@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { spawn } from 'child_process';
 import fetch from 'node-fetch';
 import readline from 'readline';
@@ -22,15 +25,15 @@ for (const arg of args) {
 }
 
 async function main() {
-  let TELEGRAM_BOT_TOKEN = cliArgs.token;
-  let TELEGRAM_CHAT_ID = cliArgs.chat;
-  let WALLET_ADDRESS = cliArgs.wallet;
+  let TELEGRAM_BOT_TOKEN = cliArgs.token || process.env.TELEGRAM_BOT_TOKEN;
+  let TELEGRAM_CHAT_ID = cliArgs.chat || process.env.TELEGRAM_CHAT_ID;
+  let WALLET_ADDRESS = cliArgs.wallet || process.env.WALLET_ADDRESS;
 
   if (!TELEGRAM_BOT_TOKEN) TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
   if (!TELEGRAM_CHAT_ID) TELEGRAM_CHAT_ID = await ask('Enter TELEGRAM_CHAT_ID: ');
   if (!WALLET_ADDRESS) WALLET_ADDRESS = await ask('Enter WALLET_ADDRESS: ');
 
-  let timeoutMinutes = await ask('Enter log restart timeout in minutes (default: 5): ');
+  let timeoutMinutes = cliArgs.timeout || process.env.TIMEOUT_MINUTES || await ask('Enter log restart timeout in minutes (default: 5): ');
   const TIMEOUT_MS = parseInt(timeoutMinutes) * 60000 || 300000;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || !WALLET_ADDRESS) {
