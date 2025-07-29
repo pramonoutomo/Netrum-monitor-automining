@@ -4,12 +4,15 @@ import fetch from 'node-fetch';
 import readline from 'readline';
 import fs from 'fs';
 import path from 'path';
-import dotenv from 'dotenv';
 
-dotenv.config();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const ask = (q) => new Promise((r) => rl.question(q, (a) => r(a.trim())));
+function ask(question) {
+  return new Promise(resolve => rl.question(question, answer => resolve(answer.trim())));
+}
 
 const args = process.argv.slice(2);
 let cliArgs = {};
@@ -18,18 +21,16 @@ for (const arg of args) {
   cliArgs[key] = value;
 }
 
-// ⚙️ HARDCODED path to claim-cli.js
-const CLAIM_CLI_PATH = '/root/netrum-lite-node/cli/claim-cli.js';
-
 async function main() {
-  let TELEGRAM_BOT_TOKEN = cliArgs.token || process.env.TELEGRAM_BOT_TOKEN;
-  let TELEGRAM_CHAT_ID = cliArgs.chat || process.env.TELEGRAM_CHAT_ID;
-  let WALLET_ADDRESS = cliArgs.wallet || process.env.WALLET_ADDRESS;
+  let TELEGRAM_BOT_TOKEN = cliArgs.token;
+  let TELEGRAM_CHAT_ID = cliArgs.chat;
+  let WALLET_ADDRESS = cliArgs.wallet;
 
   if (!TELEGRAM_BOT_TOKEN) TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
   if (!TELEGRAM_CHAT_ID) TELEGRAM_CHAT_ID = await ask('Enter TELEGRAM_CHAT_ID: ');
   if (!WALLET_ADDRESS) WALLET_ADDRESS = await ask('Enter WALLET_ADDRESS: ');
-  const timeoutMinutes = await ask('Enter log restart timeout in minutes (default: 5): ');
+
+  let timeoutMinutes = await ask('Enter log restart timeout in minutes (default: 5): ');
   const TIMEOUT_MS = parseInt(timeoutMinutes) * 60000 || 300000;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID || !WALLET_ADDRESS) {
@@ -78,10 +79,16 @@ async function main() {
     return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'HTML' })
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text,
+        parse_mode: 'HTML'
+      })
     })
-      .then(res => res.json())
-      .then(json => { if (!json.ok) console.error('Telegram Error:', json); });
+    .then(res => res.json())
+    .then(json => {
+      if (!json.ok) console.error('Telegram Error:', json);
+    });
   }
 
   async function sendDailyReport() {
@@ -99,18 +106,20 @@ NPT Balance: ${nptBalance.toFixed(6)}
     dailyStats = { mined: 0, claims: 0 };
   }
 
-  await sendDailyReport(); // Initial report
+  await sendDailyReport();
 
   function runAutoClaim() {
-    sendToTelegram('🚀 Starting automatic NPT claim...');
+    sendToTelegram('Starting automatic NPT claim...');
 
-    const claimProcess = spawn('node', [CLAIM_CLI_PATH]);
+    const claimProcess = spawn('node', ['/root/netrum-lite-node/cli/claim-cli.js']);
     let output = '';
 
     claimProcess.stdout.on('data', (data) => {
       const text = data.toString();
       output += text;
-      if (text.includes('(y/n)')) claimProcess.stdin.write('y\n');
+      if (text.includes('(y/n)')) {
+        claimProcess.stdin.write('y\n');
+      }
     });
 
     claimProcess.stderr.on('data', (data) => {
@@ -128,18 +137,13 @@ Status: Success
 Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`);
         if (logStarted) sendDailyReport();
       } else {
-        const reasonMatch = output.match(/Error: ([^\n]+)/);
-        const reason = reasonMatch ? reasonMatch[1] : `Exit Code: ${code}`;
-        sendToTelegram(`
-<b>Claim Result</b>
-Status: Failed
-Reason: ${reason}`);
+        sendToTelegram(`<b>Claim Result</b>\nStatus: Failed\nExit Code: ${code}`);
       }
     });
   }
 
   function runLogProcess() {
-    console.log('📡 Starting mining log monitoring...');
+    console.log('Starting mining log monitoring...');
     const logProcess = spawn('netrum-mining-log');
     if (!logStarted) logStarted = true;
 
@@ -147,6 +151,11 @@ Reason: ${reason}`);
       const lines = data.toString().split('\n').filter(Boolean);
       for (const line of lines) {
         console.log('[LOG]', line);
+
+        if (line.includes('Mining session completed')) {
+          logProcess.kill();
+          return runLogProcess();
+        }
 
         if (line.includes('Mined') || line.includes('Speed')) {
           const parts = line.split('|').map(p => p.trim());
@@ -165,7 +174,7 @@ Mined: ${mined}
 Speed: ${speed}
 Status: ${status}`.trim());
 
-          if (progress.includes('100.00%') && !status.toLowerCase().includes('active')) {
+          if (status === 'Claim Pending') {
             runAutoClaim();
           }
         }
@@ -181,7 +190,7 @@ Status: ${status}`.trim());
     });
 
     setTimeout(() => {
-      console.log(`🔁 Restarting mining log process after ${TIMEOUT_MS / 1000}s...`);
+      console.log(`Restarting mining log process after ${TIMEOUT_MS / 1000}s...`);
       logProcess.kill();
       runLogProcess();
     }, TIMEOUT_MS);
