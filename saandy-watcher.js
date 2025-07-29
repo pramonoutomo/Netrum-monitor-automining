@@ -42,6 +42,7 @@ async function main() {
 
   let logStarted = false;
   let dailyStats = { mined: 0, claims: 0 };
+  let claimInProgress = false;
 
   async function getBalances() {
     const rpc = 'https://base-rpc.publicnode.com';
@@ -108,8 +109,11 @@ NPT Balance: ${nptBalance.toFixed(6)}
 
   await sendDailyReport();
 
-  function runAutoClaim() {
-    sendToTelegram('Starting automatic NPT claim...');
+  async function runAutoClaim() {
+    if (claimInProgress) return;
+    claimInProgress = true;
+
+    await sendToTelegram('Starting automatic NPT claim...');
 
     const claimProcess = spawn('node', ['/root/netrum-lite-node/cli/claim-cli.js']);
     let output = '';
@@ -139,6 +143,7 @@ Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`);
       } else {
         sendToTelegram(`<b>Claim Result</b>\nStatus: Failed\nExit Code: ${code}`);
       }
+      claimInProgress = false;
     });
   }
 
@@ -174,7 +179,10 @@ Mined: ${mined}
 Speed: ${speed}
 Status: ${status}`.trim());
 
-          if (status === 'Claim Pending') {
+          if (
+            status === 'Claim Pending' ||
+            (progress && progress.includes('100.00%'))
+          ) {
             runAutoClaim();
           }
         }
