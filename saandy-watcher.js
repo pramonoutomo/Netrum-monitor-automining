@@ -5,8 +5,6 @@ dotenv.config();
 import { spawn } from 'child_process';
 import fetch from 'node-fetch';
 import readline from 'readline';
-import fs from 'fs';
-import path from 'path';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -46,6 +44,8 @@ async function main() {
   let logStarted = false;
   let dailyStats = { mined: 0, claims: 0 };
   let claimInProgress = false;
+  let lastSentLog = '';
+  let lastSentAt = 0;
 
   async function getBalances() {
     const rpc = 'https://base-rpc.publicnode.com';
@@ -174,13 +174,20 @@ Transaction: <a href="${txLink || '#'}">${txLink || 'Link not found'}</a>`);
 
           if (!isNaN(mined)) dailyStats.mined = mined;
 
-          sendToTelegram(`
+          const message = `
 <b>Mining Update</b>
 Time: ${parts[0] || '-'}
 Progress: ${progress}
 Mined: ${mined}
 Speed: ${speed}
-Status: ${status}`.trim());
+Status: ${status}`.trim();
+
+          const now = Date.now();
+          if (message !== lastSentLog || (now - lastSentAt > 10000)) {
+            lastSentLog = message;
+            lastSentAt = now;
+            sendToTelegram(message);
+          }
 
           if (
             status === 'Claim Pending' ||
