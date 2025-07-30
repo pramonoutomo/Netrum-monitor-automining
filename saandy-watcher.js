@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import './banner.js';
+
 import dotenv from 'dotenv';
 dotenv.config();
 
