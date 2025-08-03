@@ -60,7 +60,7 @@ You’ll need:
 
 ```bash
 git clone https://github.com/pramonoutomo/Netrum-monitor-automining.git
-cd netrum-monitor
+cd netrum-monitor-automining
 npm install
 ```
 
