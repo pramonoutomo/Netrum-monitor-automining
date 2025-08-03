@@ -23,7 +23,7 @@ async function main() {
 
   const stats = { mined: 0, claims: 0 };
 
-  const telegram = createTelegram(config.TELEGRAM_BOT_TOKEN, config.TELEGRAM_CHAT_ID);
+  const telegram = createTelegram(config.TELEGRAM_BOT_TOKEN, config.TELEGRAM_CHAT_ID, config.TOPIC_ID);
 
   async function sendDailyReport() {
     const { ethBalance, nptBalance } = await getBalances(config.WALLET_ADDRESS);

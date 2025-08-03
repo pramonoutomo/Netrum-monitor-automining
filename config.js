@@ -8,6 +8,7 @@ export async function getConfig(cliArgs, mode = 'manual') {
   let TELEGRAM_CHAT_ID = chat || process.env.TELEGRAM_CHAT_ID;
   let WALLET_ADDRESS = wallet || process.env.WALLET_ADDRESS;
   let timeoutMinutes = timeout || process.env.TIMEOUT_MINUTES;
+  let TOPIC_ID = topic || process.env.TELEGRAM_TOPIC_ID;
 
   if (!TELEGRAM_BOT_TOKEN) {
     if (mode === 'manual') TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
@@ -33,6 +34,7 @@ export async function getConfig(cliArgs, mode = 'manual') {
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
     WALLET_ADDRESS,
+    TOPIC_ID: TOPIC_ID ? parseInt(TOPIC_ID) : undefined,
     TIMEOUT_MS: parseInt(timeoutMinutes) * 60000 || 300000,
   };
 }
