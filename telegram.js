@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 
 export function createTelegram(token, chatId, topicId) {
   async function send(text) {
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
     const messageData = {
       chat_id: chatId,
       text,

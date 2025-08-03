@@ -1,8 +1,8 @@
 {
-  "name": "saandy-netrum-monitor",
+  "name": "Netrum-monitor-automining",
   "version": "1.0.0",
   "type": "module",
-  "description": "Netrum mining monitor with Telegram alerts",
+  "description": "Netrum mining monitor with Telegram alerts, originally by Saandy, mod by PramonoUtomo",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
