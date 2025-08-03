@@ -157,4 +157,4 @@ MIT License © 2025 Originally by [Saandy](https://github.com/KaelVNode/netrum-m
 
 Feel free to fork, modify, and use in your Netrum setup.
 
-Join our community on telegram [CodeBlockLabs](https://github.com/CodeBlockLabs)
+Join our community on telegram [CodeBlockLabs](https://t.me/CodeBlockLabs)
