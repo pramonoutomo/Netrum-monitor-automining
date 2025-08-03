@@ -77,8 +77,9 @@ npm start
 You’ll be prompted for:
 
 - `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
+- `TELEGRAM_CHAT_ID` 
 - `WALLET_ADDRESS`
+- `TOPIC_ID`
 - Timeout in minutes (default 5)
 
 > Values will be stored in `.env` for future use.
@@ -86,7 +87,7 @@ You’ll be prompted for:
 #### 🔹 Option B — Auto Mode
 
 ```bash
-npm start -- --mode=auto --token=YOUR_BOT_TOKEN --chat=CHAT_ID --wallet=0xYourWallet --timeout=5
+npm start -- --mode=auto --token=YOUR_BOT_TOKEN --chat=CHAT_ID --wallet=0xYourWallet --timeout=5 --topic=123
 ```
 
 Or define them in `.env`:
@@ -96,6 +97,7 @@ TELEGRAM_BOT_TOKEN=your_token
 TELEGRAM_CHAT_ID=your_chat_id
 WALLET_ADDRESS=0xYourWallet
 TIMEOUT_MINUTES=5
+TOPIC_ID=123
 ```
 
 Then run:
@@ -151,5 +153,8 @@ Expected log format:
 
 ## 📄 License
 
-MIT License © 2025 [Saandy](https://github.com/KaelVNode/netrum-monitor)  
+MIT License © 2025 Originally by [Saandy](https://github.com/KaelVNode/netrum-monitor), mod by [Pramono Utomo](https://github.com/PramonoUtomo)
+
 Feel free to fork, modify, and use in your Netrum setup.
+
+Join our community on telegram [CodeBlockLabs](https://github.com/CodeBlockLabs)
