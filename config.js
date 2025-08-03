@@ -3,12 +3,12 @@ import { ask } from './utils.js';
 dotenv.config();
 
 export async function getConfig(cliArgs, mode = 'manual') {
-  let { token, chat, wallet, timeout } = cliArgs;
+  let { token, chat, wallet, topic, timeout } = cliArgs;
   let TELEGRAM_BOT_TOKEN = token || process.env.TELEGRAM_BOT_TOKEN;
   let TELEGRAM_CHAT_ID = chat || process.env.TELEGRAM_CHAT_ID;
   let WALLET_ADDRESS = wallet || process.env.WALLET_ADDRESS;
-  let timeoutMinutes = timeout || process.env.TIMEOUT_MINUTES;
   let TOPIC_ID = topic || process.env.TELEGRAM_TOPIC_ID;
+  let timeoutMinutes = timeout || process.env.TIMEOUT_MINUTES;
 
   if (!TELEGRAM_BOT_TOKEN) {
     if (mode === 'manual') TELEGRAM_BOT_TOKEN = await ask('Enter TELEGRAM_BOT_TOKEN: ');
@@ -23,6 +23,11 @@ export async function getConfig(cliArgs, mode = 'manual') {
   if (!WALLET_ADDRESS) {
     if (mode === 'manual') WALLET_ADDRESS = await ask('Enter WALLET_ADDRESS: ');
     else throw new Error('Missing WALLET_ADDRESS');
+  }
+
+  if (!TOPIC_ID) {
+    if (mode === 'manual') TOPIC_ID = await ask('Enter TOPIC_ID (just enter if not needed): ');
+    else TOPIC_ID=undefined;
   }
 
   if (!timeoutMinutes) {
