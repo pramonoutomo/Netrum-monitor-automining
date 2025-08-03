@@ -59,8 +59,8 @@ You’ll need:
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/KaelVNode/netrum-monitor.git
-cd netrum-monitor
+git clone https://github.com/pramonoutomo/Netrum-monitor-automining.git
+cd netrum-monitor-automining
 npm install
 ```
 
